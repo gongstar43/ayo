@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>امتحان علوم الحاسوب — تدريب (خلفية فاتحة)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --surface: #ffffff;
+      --border: #d8dde6;
+      --text: #1a1d24;
+      --muted: #5c6578;
+      --accent: #1565c0;
+      --accent-hover: #0d47a1;
+      --ok: #2e7d32;
+      --bad: #c62828;
+      --warn-bg: #ffebee;
+      --ok-bg: #e8f5e9;
+      --opt-bg: #f8fafc;
+      --opt-hover: #edf2f7;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "IBM Plex Sans Arabic", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+    }
+
+    header {
+      margin-bottom: 1.25rem;
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .range-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem 1.15rem;
+      margin-bottom: 1rem;
+    }
+
+    .range-card h2 {
+      margin: 0 0 0.65rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .range-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .range-row label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .range-row input {
+      width: 5rem;
+      padding: 0.45rem 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      text-align: center;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .range-row input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(21, 101, 192, 0.2);
+    }
+
+    .range-hint {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+    }
+
+    .range-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .range-msg {
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      color: var(--bad);
+      min-height: 1.25em;
+    }
+
+    .range-msg.ok {
+      color: var(--ok);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+      align-items: center;
+    }
+
+    .btn {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.55rem 1rem;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      background: var(--opt-hover);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent-hover);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .progress-wrap {
+      flex: 1;
+      min-width: 140px;
+      height: 8px;
+      background: #e4e8ef;
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #42a5f5);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+
+    .stat {
+      font-size: 0.85rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.35rem 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .q-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .question-text {
+      font-size: 1.08rem;
+      font-weight: 600;
+      margin: 0 0 1.25rem;
+      line-height: 1.7;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .opt {
+      text-align: right;
+      width: 100%;
+      padding: 0.95rem 1.1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--opt-bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      line-height: 1.5;
+    }
+
+    .opt:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: var(--opt-hover);
+    }
+
+    .opt:disabled {
+      cursor: default;
+      opacity: 0.92;
+    }
+
+    .opt.wrong {
+      border-color: var(--bad);
+      background: var(--warn-bg);
+    }
+
+    .opt.correct {
+      border-color: var(--ok);
+      background: var(--ok-bg);
+    }
+
+    .feedback {
+      margin-top: 1.1rem;
+      padding: 1rem 1.1rem;
+      border-radius: 12px;
+      font-size: 0.98rem;
+      display: none;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.err {
+      background: var(--warn-bg);
+      border: 1px solid #ffcdd2;
+      color: #b71c1c;
+    }
+
+    .feedback.ok {
+      background: var(--ok-bg);
+      border: 1px solid #c8e6c9;
+      color: #1b5e20;
+    }
+
+    .feedback strong {
+      color: var(--text);
+    }
+
+    .nav-row {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-top: 1.25rem;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+    }
+
+    .letters {
+      display: inline-block;
+      width: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>تدريب على أسئلة علوم الحاسوب</h1>
+      <p>اختر إجابة واحدة. عند الخطأ تظهر الإجابة الصحيحة. حدّد نطاق أرقام الأسئلة ثم اضغط «تطبيق النطاق».</p>
+    </header>
+
+    <section class="range-card" aria-label="اختيار نطاق الأسئلة">
+      <h2>نطاق الأسئلة (حسب الرقم # في البنك)</h2>
+      <p class="range-hint" id="rangeHint">—</p>
+      <div class="range-row">
+        <label for="fromN">من</label>
+        <input type="text" id="fromN" inputmode="numeric" autocomplete="off" />
+        <label for="toN">إلى</label>
+        <input type="text" id="toN" inputmode="numeric" autocomplete="off" />
+      </div>
+      <div class="range-actions">
+        <button type="button" class="btn btn-primary" id="applyRangeBtn">تطبيق النطاق وبدء</button>
+        <button type="button" class="btn" id="preset50a">١–٥٠</button>
+        <button type="button" class="btn" id="preset50b">٥١–١٠٠</button>
+      </div>
+      <p class="range-msg" id="rangeMsg" aria-live="polite"></p>
+    </section>
+
+    <div class="toolbar">
+      <span class="stat" id="counter">—</span>
+      <div class="progress-wrap" aria-hidden="true">
+        <div class="progress-bar" id="progress"></div>
+      </div>
+      <button type="button" class="btn" id="shuffleBtn">خلط الأسئلة</button>
+      <button type="button" class="btn" id="restartBtn">من أول السؤال في النطاق</button>
+    </div>
+
+    <div id="app">
+      <div class="empty">اضغط «تطبيق النطاق وبدء» للبدء.</div>
+    </div>
+  </div>
+
+  <script src="questions-data.js"></script>
+  <script>
+    (function () {
+      const LETTERS = ["أ", "ب", "ج", "د"];
+      const AR_DIGITS = "٠١٢٣٤٥٦٧٨٩";
+
+      const raw = window.QUIZ_QUESTIONS;
+      const app = document.getElementById("app");
+      const counter = document.getElementById("counter");
+      const progress = document.getElementById("progress");
+      const fromInput = document.getElementById("fromN");
+      const toInput = document.getElementById("toN");
+      const rangeHint = document.getElementById("rangeHint");
+      const rangeMsg = document.getElementById("rangeMsg");
+
+      if (!Array.isArray(raw) || raw.length === 0) {
+        app.innerHTML =
+          '<div class="empty">تعذر تحميل الأسئلة. تأكد أن الملف <code>questions-data.js</code> بجانب هذه الصفحة.</div>';
+        return;
+      }
+
+      const maxId = raw.reduce(function (m, q) {
+        return Math.max(m, q.id);
+      }, 0);
+      const minId = raw.reduce(function (m, q) {
+        return Math.min(m, q.id);
+      }, maxId);
+
+      rangeHint.textContent =
+        "الأسئلة المتوفرة من الرقم " +
+        minId +
+        " إلى " +
+        maxId +
+        " (إجمالي " +
+        raw.length +
+        " سؤالاً). يمكنك كتابة 1–50 أو ٥٠–١٠٠ بأرقام عربية أو إنجليزية.";
+
+      fromInput.value = "1";
+      toInput.value = String(Math.min(50, maxId));
+
+      function parseNum(s) {
+        var t = String(s).trim().replace(/[\s\u200f\u200e]/g, "");
+        for (var d = 0; d < 10; d++) {
+          t = t.split(AR_DIGITS[d]).join(String(d));
+        }
+        var n = parseInt(t, 10);
+        return isNaN(n) ? NaN : n;
+      }
+
+      function buildPool(fromV, toV) {
+        var a = Math.min(fromV, toV);
+        var b = Math.max(fromV, toV);
+        a = Math.max(minId, Math.min(maxId, a));
+        b = Math.max(minId, Math.min(maxId, b));
+        var list = raw.filter(function (q) {
+          return q.id >= a && q.id <= b;
+        });
+        list.sort(function (x, y) {
+          return x.id - y.id;
+        });
+        return { pool: list, rangeLabel: a + "–" + b, a: a, b: b };
+      }
+
+      var pool = [];
+      var order = [];
+      var pos = 0;
+      var answered = false;
+      var started = false;
+
+      function seqOrder() {
+        return pool.map(function (_, i) {
+          return i;
+        });
+      }
+
+      function shuffleOrder() {
+        order = seqOrder();
+        for (var i = order.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = order[i];
+          order[i] = order[j];
+          order[j] = t;
+        }
+        pos = 0;
+        answered = false;
+        render();
+      }
+
+      function currentItem() {
+        return pool[order[pos]];
+      }
+
+      function updateChrome() {
+        var n = order.length;
+        if (!started || n === 0) {
+          counter.textContent = "—";
+          progress.style.width = "0%";
+          return;
+        }
+        counter.textContent = "السؤال " + (pos + 1) + " من " + n;
+        progress.style.width = ((pos + 1) / n) * 100 + "%";
+      }
+
+      function setRangeMessage(text, isOk) {
+        rangeMsg.textContent = text || "";
+        rangeMsg.className = "range-msg" + (isOk ? " ok" : "");
+      }
+
+      function applyRange() {
+        var f = parseNum(fromInput.value);
+        var t = parseNum(toInput.value);
+        if (isNaN(f) || isNaN(t)) {
+          setRangeMessage("اكتب رقماً صحيحاً في «من» و«إلى».");
+          return;
+        }
+        var built = buildPool(f, t);
+        if (built.pool.length === 0) {
+          setRangeMessage("لا توجد أسئلة في هذا النطاق.");
+          return;
+        }
+        pool = built.pool;
+        started = true;
+        order = seqOrder();
+        pos = 0;
+        answered = false;
+        setRangeMessage(
+          "تم تحميل " + pool.length + " سؤالاً (الأرقام " + built.rangeLabel + ").",
+          true
+        );
+        render();
+      }
+
+      function render() {
+        if (!started || pool.length === 0) {
+          app.innerHTML =
+            '<div class="empty">حدّد النطاق ثم اضغط «تطبيق النطاق وبدء».</div>';
+          updateChrome();
+          return;
+        }
+
+        var item = currentItem();
+        answered = false;
+        updateChrome();
+
+        var opts = item.options.map(function (txt, i) {
+          return { text: txt, originalIndex: i };
+        });
+        var shuffled = opts.slice();
+        for (var i = shuffled.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = shuffled[i];
+          shuffled[i] = shuffled[j];
+          shuffled[j] = tmp;
+        }
+
+        var correctOriginal = item.correctIndex;
+        var correctText = item.options[correctOriginal];
+
+        app.innerHTML =
+          '<div class="card">' +
+          '<div class="q-meta">صفحة PDF رقم ' +
+          item.page +
+          " · #" +
+          item.id +
+          "</div>" +
+          '<p class="question-text" lang="en" dir="ltr">' +
+          escapeHtml(item.question) +
+          "</p>" +
+          '<div class="options" id="opts"></div>' +
+          '<div class="feedback" id="fb" role="status"></div>' +
+          '<div class="nav-row">' +
+          '<button type="button" class="btn" id="prevBtn">السابق</button>' +
+          '<button type="button" class="btn btn-primary" id="nextBtn" disabled>التالي</button>' +
+          "</div>" +
+          "</div>";
+
+        var optsEl = document.getElementById("opts");
+        var fb = document.getElementById("fb");
+        var nextBtn = document.getElementById("nextBtn");
+        var prevBtn = document.getElementById("prevBtn");
+
+        prevBtn.disabled = pos === 0;
+        nextBtn.disabled = true;
+
+        shuffled.forEach(function (o, displayIdx) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "opt";
+          btn.lang = "en";
+          btn.dir = "ltr";
+          btn.dataset.orig = String(o.originalIndex);
+          btn.innerHTML =
+            '<span class="letters">' +
+            LETTERS[displayIdx] +
+            ")</span> " +
+            escapeHtml(o.text);
+          btn.addEventListener("click", function () {
+            if (answered) return;
+            answered = true;
+            var isCorrect = o.originalIndex === correctOriginal;
+            var all = optsEl.querySelectorAll(".opt");
+            for (var k = 0; k < all.length; k++) {
+              all[k].disabled = true;
+            }
+            if (isCorrect) {
+              btn.classList.add("correct");
+              fb.className = "feedback ok show";
+              fb.textContent = "صحيح — أحسنت.";
+            } else {
+              btn.classList.add("wrong");
+              for (var k = 0; k < all.length; k++) {
+                if (Number(all[k].dataset.orig) === correctOriginal) {
+                  all[k].classList.add("correct");
+                }
+              }
+              fb.className = "feedback err show";
+              fb.innerHTML =
+                "خطأ. <strong>الإجابة الصحيحة:</strong> " +
+                escapeHtml(correctText);
+            }
+            nextBtn.disabled = false;
+          });
+          optsEl.appendChild(btn);
+        });
+
+        prevBtn.addEventListener("click", function () {
+          if (pos > 0) {
+            pos--;
+            render();
+          }
+        });
+
+        nextBtn.addEventListener("click", function () {
+          if (pos < order.length - 1) {
+            pos++;
+            render();
+          } else {
+            var built = buildPool(parseNum(fromInput.value), parseNum(toInput.value));
+            app.innerHTML =
+              '<div class="card empty">' +
+              "<p>انتهيت من هذا النطاق.</p>" +
+              '<p style="font-size:0.9rem;color:var(--muted)">يمكنك تغيير «من / إلى» أعلاه ثم «تطبيق النطاق» للمجموعة التالية (مثلاً ٥١–١٠٠).</p>' +
+              '<div class="nav-row" style="justify-content:center;margin-top:1rem">' +
+              '<button type="button" class="btn" id="redoRange">إعادة نفس النطاق</button>' +
+              '<button type="button" class="btn btn-primary" id="focusRange">تغيير النطاق</button>' +
+              "</div></div>";
+            document.getElementById("redoRange").addEventListener("click", function () {
+              order = seqOrder();
+              pos = 0;
+              render();
+            });
+            document.getElementById("focusRange").addEventListener("click", function () {
+              fromInput.focus();
+              fromInput.select();
+            });
+            counter.textContent = "اكتمل";
+            progress.style.width = "100%";
+          }
+        });
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      document.getElementById("applyRangeBtn").addEventListener("click", applyRange);
+
+      document.getElementById("preset50a").addEventListener("click", function () {
+        fromInput.value = "1";
+        toInput.value = String(Math.min(50, maxId));
+        applyRange();
+      });
+
+      document.getElementById("preset50b").addEventListener("click", function () {
+        fromInput.value = "51";
+        toInput.value = String(Math.min(100, maxId));
+        applyRange();
+      });
+
+      document.getElementById("shuffleBtn").addEventListener("click", function () {
+        if (!started || pool.length === 0) {
+          setRangeMessage("طبّق نطاقاً أولاً.");
+          return;
+        }
+        shuffleOrder();
+      });
+
+      document.getElementById("restartBtn").addEventListener("click", function () {
+        if (!started || pool.length === 0) {
+          setRangeMessage("طبّق نطاقاً أولاً.");
+          return;
+        }
+        order = seqOrder();
+        pos = 0;
+        render();
+      });
+
+      updateChrome();
+    })();
+  </script>
+</body>
+</html>
