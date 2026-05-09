@@ -301,6 +301,97 @@
       color: var(--muted);
     }
 
+    .is-hidden {
+      display: none !important;
+    }
+
+    .gate-screen {
+      min-height: 100vh;
+      padding: 1.5rem 0;
+    }
+
+    .gate-card h1 {
+      font-size: 1.25rem;
+      margin: 0 0 0.5rem;
+    }
+
+    .gate-lead {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0 0 1rem;
+      line-height: 1.7;
+    }
+
+    .pay-box:empty {
+      display: none;
+    }
+
+    .pay-title {
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      color: var(--text);
+    }
+
+    .pay-row {
+      margin: 0.3rem 0;
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+
+    .pay-row strong {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .voucher-field {
+      margin-top: 1rem;
+    }
+
+    .voucher-field label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+      color: var(--muted);
+    }
+
+    .voucher-field input {
+      width: 100%;
+      max-width: 340px;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    .gate-actions {
+      margin-top: 1rem;
+    }
+
+    .gate-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 1rem;
+      line-height: 1.55;
+    }
+
+    .exam-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.25rem;
+    }
+
+    .exam-head-text h1 {
+      margin: 0 0 0.35rem;
+    }
+
+    .exam-head-text p {
+      margin: 0;
+    }
+
     .letters {
       display: inline-block;
       width: 1.6rem;
@@ -310,10 +401,47 @@
   </style>
 </head>
 <body>
+  <div id="gateScreen" class="gate-screen">
+    <div class="wrap">
+      <div class="range-card gate-card">
+        <h1>دخول الامتحان</h1>
+        <p class="gate-lead">
+          أكمل التحويل على الحساب الموضح أدناه، ثم أدخل كود البطاقة الذي يُرسل لك. بدون كود صالح لا يُفتح محتوى الأسئلة.
+        </p>
+        <div class="pay-box" id="paymentBox"></div>
+        <div class="voucher-field">
+          <label for="voucherInput">كود البطاقة</label>
+          <input
+            type="text"
+            id="voucherInput"
+            name="voucher"
+            autocomplete="off"
+            placeholder="CARD-..."
+            dir="ltr"
+            style="text-align: left"
+          />
+        </div>
+        <div class="gate-actions">
+          <button type="button" class="btn btn-primary" id="voucherSubmit">دخول الامتحان</button>
+        </div>
+        <p class="range-msg" id="gateError" role="alert"></p>
+        <p class="gate-note">
+          تنبيه: الملفات على الإنترنت يمكن لمن يتقن التقنية مطالعتها؛ الأكواد هنا مناسبة لسياق بسيط فقط. للحماية القوية يلزم خادم (سيرفر).
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="examScreen" class="is-hidden">
   <div class="wrap">
     <header>
-      <h1>تدريب على أسئلة علوم الحاسوب</h1>
-      <p>اختر إجابة واحدة. عند الخطأ تظهر الإجابة الصحيحة. حدّد نطاق أرقام الأسئلة ثم اضغط «تطبيق النطاق».</p>
+      <div class="exam-head">
+        <div class="exam-head-text">
+          <h1>تدريب على أسئلة علوم الحاسوب</h1>
+          <p>اختر إجابة واحدة. عند الخطأ تظهر الإجابة الصحيحة. حدّد نطاق أرقام الأسئلة ثم اضغط «تطبيق النطاق».</p>
+        </div>
+        <button type="button" class="btn" id="logoutAccessBtn" title="مسح الجلسة والعودة لشاشة الكود">خروج</button>
+      </div>
     </header>
 
     <section class="range-card" aria-label="اختيار نطاق الأسئلة">
@@ -346,10 +474,191 @@
       <div class="empty">اضغط «تطبيق النطاق وبدء» للبدء.</div>
     </div>
   </div>
+  </div>
 
+  <script src="vouchers-config.js"></script>
   <script src="questions-data.js"></script>
   <script>
     (function () {
+      var cfg = window.EXAM_ACCESS_CONFIG;
+      var gateScreen = document.getElementById("gateScreen");
+      var examScreen = document.getElementById("examScreen");
+      var gateError = document.getElementById("gateError");
+      var paymentBox = document.getElementById("paymentBox");
+
+      function escGate(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function simpleHash(str) {
+        var h = 5381;
+        for (var i = 0; i < str.length; i++) {
+          h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+        }
+        return String(h);
+      }
+
+      function normalizeCode(s) {
+        return String(s)
+          .trim()
+          .replace(/\s+/g, "")
+          .toUpperCase();
+      }
+
+      function hasValidAccess() {
+        var raw = localStorage.getItem("exam_access_json");
+        if (!raw) return false;
+        try {
+          var o = JSON.parse(raw);
+          if (!o.expiresAt || Date.now() > o.expiresAt) {
+            localStorage.removeItem("exam_access_json");
+            return false;
+          }
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function clearAllAccessKeys() {
+        localStorage.removeItem("exam_access_json");
+        for (var i = localStorage.length - 1; i >= 0; i--) {
+          var k = localStorage.key(i);
+          if (k && k.indexOf("exam_first_") === 0) {
+            localStorage.removeItem(k);
+          }
+        }
+      }
+
+      function showExam() {
+        gateScreen.classList.add("is-hidden");
+        examScreen.classList.remove("is-hidden");
+      }
+
+      function renderPaymentBox() {
+        var p = (cfg && cfg.payment) || {};
+        var iban = p.iban
+          ? '<p class="pay-row"><strong>IBAN:</strong> ' + escGate(p.iban) + "</p>"
+          : "";
+        paymentBox.innerHTML =
+          '<p class="pay-title">' +
+          escGate(p.headline || "التحويل البنكي") +
+          "</p>" +
+          (p.amountHint
+            ? '<p class="pay-row">' + escGate(p.amountHint) + "</p>"
+            : "") +
+          (p.beneficiary
+            ? '<p class="pay-row"><strong>اسم صاحب الحساب:</strong> ' +
+              escGate(p.beneficiary) +
+              "</p>"
+            : "") +
+          (p.bank
+            ? '<p class="pay-row"><strong>البنك:</strong> ' + escGate(p.bank) + "</p>"
+            : "") +
+          (p.accountNumber
+            ? '<p class="pay-row"><strong>رقم الحساب:</strong> <span dir="ltr" style="font-weight:700">' +
+              escGate(p.accountNumber) +
+              "</span></p>"
+            : "") +
+          iban +
+          (p.extraNote
+            ? '<p class="pay-row" style="margin-top:0.75rem">' +
+              escGate(p.extraNote) +
+              "</p>"
+            : "");
+      }
+
+      function tryActivate(codeNorm) {
+        var list = (cfg && cfg.vouchers) || [];
+        var v = null;
+        for (var i = 0; i < list.length; i++) {
+          if (normalizeCode(list[i].code) === codeNorm) {
+            v = list[i];
+            break;
+          }
+        }
+        if (!v) {
+          return { ok: false, msg: "الكود غير صحيح." };
+        }
+        var now = Date.now();
+        var expiresAt;
+        var days = (cfg && cfg.voucherValidityDays) || 7;
+        if (v.validUntil) {
+          expiresAt = new Date(v.validUntil).getTime();
+          if (isNaN(expiresAt)) {
+            return { ok: false, msg: "تاريخ انتهاء الكود في الإعدادات غير صالح." };
+          }
+          if (now > expiresAt) {
+            return { ok: false, msg: "انتهت صلاحية هذا الكود." };
+          }
+        } else {
+          var key = "exam_first_" + simpleHash(codeNorm);
+          var first = localStorage.getItem(key);
+          if (!first) {
+            first = String(now);
+            localStorage.setItem(key, first);
+          }
+          var firstTs = parseInt(first, 10);
+          expiresAt = firstTs + days * 86400000;
+          if (now > expiresAt) {
+            return {
+              ok: false,
+              msg:
+                "انتهت صلاحية هذا الكود (مرّت " +
+                days +
+                " يوماً من أول استخدام لهذا الكود على هذا المتصفح).",
+            };
+          }
+        }
+        localStorage.setItem(
+          "exam_access_json",
+          JSON.stringify({ expiresAt: expiresAt })
+        );
+        return { ok: true };
+      }
+
+      function submitVoucher() {
+        gateError.textContent = "";
+        gateError.className = "range-msg";
+        var rawCode = document.getElementById("voucherInput").value;
+        var n = normalizeCode(rawCode);
+        if (!n) {
+          gateError.textContent = "أدخل كود البطاقة.";
+          return;
+        }
+        var r = tryActivate(n);
+        if (!r.ok) {
+          gateError.textContent = r.msg;
+          return;
+        }
+        showExam();
+      }
+
+      if (!cfg) {
+        paymentBox.innerHTML =
+          '<p class="pay-row" style="color:var(--bad)">تعذر تحميل <code>vouchers-config.js</code>. أضف الملف بجانب index.html.</p>';
+        return;
+      }
+
+      renderPaymentBox();
+      document.getElementById("voucherSubmit").addEventListener("click", submitVoucher);
+      document.getElementById("voucherInput").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") submitVoucher();
+      });
+
+      document.getElementById("logoutAccessBtn").addEventListener("click", function () {
+        clearAllAccessKeys();
+        location.reload();
+      });
+
+      if (hasValidAccess()) {
+        showExam();
+      }
+
       const LETTERS = ["أ", "ب", "ج", "د"];
       const AR_DIGITS = "٠١٢٣٤٥٦٧٨٩";
 
