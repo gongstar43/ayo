@@ -476,6 +476,7 @@
   </div>
   </div>
 
+  <script src="vouchers-data.js"></script>
   <script src="vouchers-config.js"></script>
   <script src="questions-data.js"></script>
   <script>
@@ -560,8 +561,15 @@
             ? '<p class="pay-row"><strong>البنك:</strong> ' + escGate(p.bank) + "</p>"
             : "") +
           (p.accountNumber
-            ? '<p class="pay-row"><strong>رقم الحساب:</strong> <span dir="ltr" style="font-weight:700">' +
+            ? '<p class="pay-row"><strong>رقم الحساب (Super QI):</strong> <span dir="ltr" style="font-weight:700">' +
               escGate(p.accountNumber) +
+              "</span></p>"
+            : "") +
+          (p.walletLabel && p.walletNumber
+            ? '<p class="pay-row"><strong>' +
+              escGate(p.walletLabel) +
+              ':</strong> <span dir="ltr" style="font-weight:700">' +
+              escGate(p.walletNumber) +
               "</span></p>"
             : "") +
           iban +
@@ -572,8 +580,21 @@
             : "");
       }
 
+      function getMergedVouchers() {
+        var out = [];
+        var fromCfg = (cfg && cfg.vouchers) || [];
+        for (var i = 0; i < fromCfg.length; i++) {
+          out.push(fromCfg[i]);
+        }
+        var bulk = window.EXAM_VOUCHER_CODES || [];
+        for (var j = 0; j < bulk.length; j++) {
+          out.push({ code: bulk[j], validUntil: null });
+        }
+        return out;
+      }
+
       function tryActivate(codeNorm) {
-        var list = (cfg && cfg.vouchers) || [];
+        var list = getMergedVouchers();
         var v = null;
         for (var i = 0; i < list.length; i++) {
           if (normalizeCode(list[i].code) === codeNorm) {
